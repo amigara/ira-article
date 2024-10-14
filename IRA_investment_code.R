@@ -41,11 +41,6 @@ investments_meta <- read_csv("manufacturing_energy_and_industry_facility_metadat
   clean_names() %>% 
   mutate(announcement_date = mdy(announcement_date))
 
-#GGRF communities data
-communities <- read_csv("GGRF_1.0_communities.csv") %>% 
-  clean_names() %>% 
-  rename(census_tract_2010_geoid = census_tract_2010_id)
-
 #Congressional district data for maps
 congressional_post <- read_csv("congressional_district_actual_mfg_energy_and_ind_investment.csv") %>% 
   clean_names() %>% 
@@ -92,13 +87,16 @@ summary_data <- investments_by_period %>%
 
 summary_data %>% write_csv("IRA_summary_data.csv")
 
-#Create data set for manufacturing investments
+#Create data sets for manufacturing investments
+
+#Pre-IRA vs. post-IRA comparison
 manufacturing_investments_by_period <- investments_by_period %>%
   filter(segment == "Manufacturing") %>%
   group_by(technology, period) %>%
   summarize(capex_sum = sum(estimated_actual_quarterly_expenditure)*1000000) %>%
   arrange(desc(capex_sum))
 
+#Quarterly comparison
 quarterly_investments_manufacturing <- quarterly_investments %>% 
   filter(segment == "Manufacturing")
 
@@ -125,6 +123,7 @@ manufacturing_investments_by_period_graph
 
 ggsave("manufacturing_investments_by_period_graph.jpeg", manufacturing_investments_by_period_graph, width = 2500, units = "px")
 
+#Quarterly investment graph
 manufacturing_investments_quarterly_graph <- quarterly_investments_manufacturing %>%
   ggplot(aes(x=quarter, y=estimated_actual_quarterly_expenditure, fill=technology)) +
   geom_bar(stat = "identity", position = "stack") +
